@@ -36,9 +36,11 @@
 
 ### 1.2 Воспроизведи звук
 
+Звук лежит в **SoundService** (Шаг 1.1), поэтому обращаемся через `game.SoundService`:
+
 ```lua
 -- Воспроизвести звук
-local sound = workspace:WaitForChild("JumpSound")
+local sound = game.SoundService:WaitForChild("JumpSound")
 sound:Play()
 ```
 
@@ -48,9 +50,11 @@ sound:Play()
 |------|-----|-----------------|
 | Прыжок | `rbxassetid://130797689` | При прыжке |
 | Смерть | `rbxassetid://130797745` | При смерти |
+| Урон | `rbxassetid://131961136` | При TakeDamage |
 | Чекпоинт | `rbxassetid://130797546` | При достижении чекпоинта |
-| Победа | `rbxassetid://130797546` | На финише |
-| Урон | `rbxassetid://130797745` | При TakeDamage |
+| Победа | `rbxassetid://131323304` | На финише |
+
+> Это временные заглушки — у разных событий должны быть разные звуки. Замени ID на понравившиеся из каталога Roblox (см. ссылки внизу страницы).
 
 ### 1.4 Звук смерти
 
@@ -258,14 +262,15 @@ Workspace
 │   ├── Камни
 │   └── Вода
 ├── FinishPlatform
-├── Sounds
-│   ├── JumpSound
-│   ├── DeathSound
-│   └── CheckpointSound
 └── Lighting
     ├── Atmosphere
     ├── Sky
     └── BloomEffect
+
+SoundService (звуки здесь, а не в Workspace)
+├── JumpSound
+├── DeathSound
+└── CheckpointSound
 ```
 
 ---

@@ -160,6 +160,8 @@ deathCountEvent.OnServerEvent:Connect(function(player, type, amount, element)
 end)
 ```
 
+> **Задание со звёздочкой*:** сделай простой чат — добавь в GUI **TextBox**, а по нажатию клавиши Enter отправляй его текст: `deathCountEvent:FireServer(textBox.Text)`. Сервер получает сообщение и выводит его через `print`. Вывод всем игрокам на экран изучим позже.
+
 ---
 
 ## Шаг 4: Модель безопасности
@@ -214,53 +216,60 @@ end)
 
 ---
 
-## Шаг 5: Практический пример — команда "RESET"
+## Шаг 5: Практический пример — кнопка «Возродиться»
+
+Помнишь кнопку **RespawnButton** из Фазы 5? Она умела только скрывать экран смерти. Теперь подключим её к серверу: клиент отправит запрос через RemoteEvent, а сервер возродит игрока командой `LoadCharacter()`.
 
 ### 5.1 RemoteEvent
 
-Создай `ResetEvent` в ReplicatedStorage.
+Создай `RespawnEvent` в ReplicatedStorage.
 
 ### 5.2 Серверный обработчик
 
 ```lua
--- Сервер: сброс прогресса
+-- Сервер: возрождает игрока по запросу
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
-local resetEvent = ReplicatedStorage:WaitForChild("ResetEvent")
+local respawnEvent = ReplicatedStorage:WaitForChild("RespawnEvent")
 
-resetEvent.OnServerEvent:Connect(function(player)
-    -- Сбрасываем чекпоинт
-    local leaderstats = player:FindFirstChild("leaderstats")
-    if leaderstats then
-        local deaths = leaderstats:FindFirstChild("Deaths")
-        if deaths then
-            deaths.Value = 0
-        end
-    end
-
-    -- Респавним игрока
+respawnEvent.OnServerEvent:Connect(function(player)
+    -- LoadCharacter() удаляет текущего персонажа и создаёт нового.
+    -- Новый персонаж появится на player.RespawnLocation — то есть на
+    -- последнем чекпоинте из CheckpointManager (Фаза 4)
     player:LoadCharacter()
-
-    print(player.Name .. " сбросил прогресс")
+    print(player.Name .. " возродился по кнопке")
 end)
 ```
 
-### 5.3 Клиентская кнопка
+> **Почему это безопасно:** сервер сам вызывает `LoadCharacter` для того игрока, который прислал запрос. Клиент не может возродить кого-то другого.
+
+### 5.3 Подключаем кнопку из Фазы 5
+
+Открой **HUDUpdater** (LocalScript в GameHUD из Фазы 5) и замени обработчик кнопки:
 
 ```lua
--- LocalScript: кнопка сброса
+-- Было (Фаза 5): кнопка только скрывала экран
+-- respawnButton.MouseButton1Click:Connect(function()
+--     hideDeathScreen()
+-- end)
+
+-- Стало: кнопка просит сервер возродить игрока
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local resetEvent = ReplicatedStorage:WaitForChild("ResetEvent")
+local respawnEvent = ReplicatedStorage:WaitForChild("RespawnEvent")
 
--- Кнопка в GUI
-local resetButton = script.Parent:WaitForChild("ResetButton")
-
-resetButton.MouseButton1Click:Connect(function()
-    resetEvent:FireServer()
-    print("Запрос на сброс отправлен!")
+respawnButton.MouseButton1Click:Connect(function()
+    respawnEvent:FireServer()
 end)
 ```
+
+Экран скрывать вручную больше не нужно: после `LoadCharacter` у игрока появится новый персонаж, сработает `CharacterAdded`, и `hideDeathScreen()` вызовется сам (см. `onCharacterAdded` из Фазы 5).
+
+### 5.4 Запусти и проверь
+
+Умри → нажми «Возродиться» → игрок появляется на последнем чекпоинте. Кнопка из Фазы 5 наконец работает по-настоящему.
+
+> **Задание со звёздочкой*:** добавь кулдаун — не давай игроку спамить FireServer чаще раза в секунду (на сервере сравнивай `os.clock()` с временем прошлого запроса).
 
 ---
 

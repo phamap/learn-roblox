@@ -234,6 +234,10 @@ local Players = game:GetService("Players")
 local myDataStore = DataStoreService:GetDataStore("PlayerData")
 local AUTO_SAVE_INTERVAL = 60
 
+-- Защита от двойного сохранения при выключении сервера (см. ниже)
+local serverClosing = false
+local shutdownSaved = {}
+
 -- Загрузка данных
 local function loadData(player)
     local success, data = pcall(function()
@@ -252,6 +256,12 @@ end
 
 -- Сохранение данных
 local function saveData(player)
+    -- При выключении сервера каждый игрок сохраняется только один раз
+    if serverClosing and shutdownSaved[player] then return end
+    if serverClosing then
+        shutdownSaved[player] = true
+    end
+
     local leaderstats = player:FindFirstChild("leaderstats")
     if not leaderstats then return end
 
@@ -259,7 +269,9 @@ local function saveData(player)
     if not deaths then return end
 
     local data = {
-        deaths = deaths.Value
+        deaths = deaths.Value,
+        -- Сохраняем чекпоинт по имени (SpawnLocation из Фазы 4)
+        checkpoint = player.RespawnLocation and player.RespawnLocation.Name
     }
 
     local success, err = pcall(function()
@@ -277,7 +289,7 @@ end
 Players.PlayerAdded:Connect(function(player)
     local data = loadData(player)
 
-    -- Создаём leaderstats
+    -- Создаём leaderstats ПОСЛЕ загрузки данных — гонки нет
     local leaderstats = Instance.new("Folder")
     leaderstats.Name = "leaderstats"
     leaderstats.Parent = player
@@ -286,11 +298,26 @@ Players.PlayerAdded:Connect(function(player)
     deaths.Name = "Deaths"
     deaths.Value = data.deaths or 0
     deaths.Parent = leaderstats
+
+    -- Восстанавливаем чекпоинт (сохранён здесь, механика RespawnLocation из Фазы 4)
+    if data.checkpoint then
+        local checkpointsFolder = workspace:FindFirstChild("Checkpoints")
+        local checkpoint = checkpointsFolder and checkpointsFolder:FindFirstChild(data.checkpoint)
+
+        if checkpoint and checkpoint:IsA("SpawnLocation") then
+            player.RespawnLocation = checkpoint
+            print(player.Name .. " вернулся на чекпоинт: " .. data.checkpoint)
+        end
+    end
 end)
 
-Players.PlayerRemoving:Connect(saveData)
+Players.PlayerRemoving:Connect(function(player)
+    saveData(player)
+end)
 
 game:BindToClose(function()
+    -- Выключаемся: помечаем режим, чтобы PlayerRemoving не сохранил второй раз
+    serverClosing = true
     for _, player in ipairs(Players:GetPlayers()) do
         saveData(player)
     end
@@ -306,6 +333,28 @@ task.spawn(function()
     end
 end)
 ```
+
+### Важно: удали старый скрипт leaderstats
+
+В Фазе 5 ты создавал отдельный серверный скрипт, который создаёт `leaderstats`. **Удали его** — полный `DataStoreManager` теперь создаёт leaderstats сам, причём уже после загрузки данных из DataStore (значения сразу правильные). Два скрипта будут создавать папку дважды и конфликтовать.
+
+> Проверь в ServerScriptService: должен остаться только `DataStoreManager` (+ твой CheckpointManager). Скрипт с leaderstats из Фазы 5 удалён.
+
+### Про двойное сохранение
+
+При выключении сервера Roblox вызывает **и** `PlayerRemoving` для каждого игрока, **и** `BindToClose`. Без защиты данные записывались бы дважды — не сломанно, но зря тратит лимиты запросов. В коде выше это решено флагами `serverClosing` / `shutdownSaved`: при выключении каждый игрок сохраняется ровно один раз.
+
+> Альтернатива — пропустить сохранение через BindToClose в Studio: `if game:GetService("RunService"):IsStudio() then return end`. Но флаг работает и в Studio, и в опубликованной игре.
+
+### Согласованность с Фазой 4
+
+Восстановленный из сохранения чекпоинт устанавливается через `player.RespawnLocation` — тот же механизм, что и в CheckpointManager. Чтобы порядок запуска скриптов не имел значения, строка установки стартового спавна в CheckpointManager должна быть такой:
+
+```lua
+player.RespawnLocation = player.RespawnLocation or startSpawn
+```
+
+Тогда `DataStoreManager`, восстановивший чекпоинт раньше, не будет перезаписан.
 
 ---
 

@@ -297,13 +297,14 @@ player.CharacterAdded:Connect(onCharacterAdded)
 
 -- Кнопка "Возродиться"
 respawnButton.MouseButton1Click:Connect(function()
-    -- Сервер должен вызвать LoadCharacter
-    -- На клиенте мы просто скрываем экран
+    -- Пока просто скрываем экран. К серверу подключим кнопку в Фазе 5.5!
     hideDeathScreen()
 end)
 ```
 
 > **MouseButton1Click** — событие клика по кнопке. LocalScript может реагировать на клики.
+
+> **Временное ограничение:** сейчас кнопка только скрывает экран — Roblox и так респавнит игрока автоматически. В **Фазе 5.5** мы подключим её к серверу через RemoteEvent, чтобы возрождение происходило по нажатию.
 
 ---
 
@@ -393,6 +394,7 @@ player.CharacterAdded:Connect(onCharacterAdded)
 
 -- Кнопка возрождения
 respawnButton.MouseButton1Click:Connect(function()
+    -- Пока просто скрываем экран. К серверу подключим кнопку в Фазе 5.5!
     hideDeathScreen()
 end)
 ```

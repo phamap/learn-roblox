@@ -243,11 +243,11 @@ tween:Play()
 ### 5.1 Остановить tween
 
 ```lua
--- Остановить движение
-tween:Cancel()  -- остановить на текущей позиции
+-- Cancel(): останавливает анимацию на текущей позиции
+tween:Cancel()
 
--- Завершить tween (переместить в конечную точку)
-tween:Play()    -- запустить заново
+-- Play(): запускает tween заново с начала
+tween:Play()
 ```
 
 ### 5.2 Задержка перед стартом
@@ -300,25 +300,44 @@ local TweenService = game:GetService("TweenService")
 
 local center = platform.Position
 local radius = 10
-local speed = 2
+local STEP_ANGLE = 0.1   -- угол одного сегмента (радианы)
+local segmentTime = 0.25 -- время анимации одного сегмента (секунды)
+-- Полный оборот: 2π / STEP_ANGLE ≈ 63 сегмента → ~16 секунд
 local angle = 0
 
 while true do
-    angle = angle + 0.1
+    angle = angle + STEP_ANGLE
     local targetPos = center + Vector3.new(
         math.cos(angle) * radius,
         0,
         math.sin(angle) * radius
     )
 
-    local tweenInfo = TweenInfo.new(speed, Enum.EasingStyle.Linear)
+    local tweenInfo = TweenInfo.new(segmentTime, Enum.EasingStyle.Linear)
     local tween = TweenService:Create(platform, tweenInfo, {Position = targetPos})
     tween:Play()
-    tween.Completed:Wait()
-
-    task.wait(0)  -- даём игре обработать кадр
+    tween.Completed:Wait()  -- ждём завершения сегмента, потом следующий
 end
 ```
+
+### Упражнение: мёртвая зона
+
+Платформа, которая исчезает, когда игрок на неё наступает. Создай Part с именем `DeadZone` между платформами и добавь скрипт:
+
+```lua
+-- DeadZone: исчезает при касании — игрок проваливается
+local zone = script.Parent
+
+zone.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        zone.Transparency = 1   -- делаем невидимой
+        zone.CanCollide = false -- отключаем физику — сквозь неё можно провалиться
+    end
+end)
+```
+
+> **Задание со звёздочкой*:** верни платформу через 3 секунды после исчезновения (`task.wait(3)` в отдельном потоке через `task.spawn`, затем `Transparency = 0` и `CanCollide = true`).
 
 ---
 

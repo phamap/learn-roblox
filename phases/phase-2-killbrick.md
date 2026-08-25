@@ -167,21 +167,39 @@ brick.Touched:Connect(function(hit)
 end)
 ```
 
-### 4.2 Оранжевый кирпич (постепенный урон)
+### 4.2 Оранжевый кирпич (периодический урон)
 
 ```lua
--- PoisonBrick: 10 урона каждые 0.5 сек
+-- PoisonBrick: 10 урона каждые 0.5 сек, пока игрок стоит на кирпиче
 local brick = script.Parent
 local DAMAGE = 10
-local RATE = 0.5
+local RATE = 0.5  -- интервал между уронами (секунды)
+
+local onBrick = {}  -- какие гуманоиды сейчас стоят на кирпиче
 
 brick.Touched:Connect(function(hit)
     local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid and not onBrick[humanoid] then
+        onBrick[humanoid] = true
+
+        -- Наносим урон по таймеру, пока игрок стоит на кирпиче
+        while onBrick[humanoid] and humanoid.Health > 0 do
+            humanoid:TakeDamage(DAMAGE)
+            task.wait(RATE)
+        end
+    end
+end)
+
+brick.TouchEnded:Connect(function(hit)
+    -- Игрок сошёл с кирпича — прекращаем урон
+    local humanoid = hit.Parent and hit.Parent:FindFirstChild("Humanoid")
     if humanoid then
-        humanoid:TakeDamage(DAMAGE)
+        onBrick[humanoid] = nil
     end
 end)
 ```
+
+> **TouchEnded** — событие, обратное Touched: срабатывает когда часть перестаёт касаться. Пока игрок стоит на кирпиче, цикл наносит `DAMAGE` каждые `RATE` секунд.
 
 ### 4.3 Жёлтый кирпич (отбрасывание)
 
@@ -213,25 +231,39 @@ end)
 ### 4.4 Синий кирпич (замедление)
 
 ```lua
--- SlowBrick: замедляет игрока
+-- SlowBrick: временно замедляет игрока
 local brick = script.Parent
-local WALK_SPEED = 8  -- нормальная скорость
-local SLOW_SPEED = 2  -- замедленная
+local SLOW_SPEED = 2  -- замедленная скорость
+local SLOW_TIME = 3   -- сколько секунд держится замедление
+local debounce = false
 
 brick.Touched:Connect(function(hit)
-    local humanoid = hit.Parent:FindFirstChild("Humanoid")
-    if humanoid then
+    local character = hit.Parent
+    local humanoid = character:FindFirstChild("Humanoid")
+
+    if humanoid and not debounce and humanoid.Health > 0 then
+        debounce = true
+
+        -- Запоминаем скорость, которая была до касания
+        local originalSpeed = humanoid.WalkSpeed
+
         humanoid.WalkSpeed = SLOW_SPEED
         print("Замедление!")
 
-        task.wait(3)  -- замедление на 3 секунды
-        humanoid.WalkSpeed = WALK_SPEED
-        print("Скорость восстановлена!")
+        task.wait(SLOW_TIME)
+
+        -- Восстанавливаем исходную скорость (если игрок ещё жив)
+        if humanoid.Health > 0 then
+            humanoid.WalkSpeed = originalSpeed
+            print("Скорость восстановлена!")
+        end
+
+        debounce = false
     end
 end)
 ```
 
-> **WalkSpeed** — скорость ходьбы. По умолчанию 16. Можно менять динамически.
+> **WalkSpeed** — скорость ходьбы. По умолчанию 16. Мы не хардкодим «нормальную» скорость, а запоминаем ту, что была до касания: так замедление не сломается, если игрок уже замедлен чем-то другим.
 
 ### 4.5 Фиолетовый кирпич (невидимая стена)
 
@@ -298,7 +330,7 @@ Workspace
 | Ошибка | Причина | Решение |
 |--------|---------|---------|
 | Урон наносится 2-3 раза за касание | Нет debounce | Добавь флаг `debounce = false` и `task.wait()` |
-| Kill Brick не убивает | Script вместо LocalScript | Убедись что это **Script** |
+| Kill Brick не убивает | Внутри кирпича LocalScript — сервер его не выполняет | Замени на обычный **Script** (правая кнопка по кирпичу → Insert Object → Script) |
 | "Health is not a valid member" | Объект не Humanoid | Проверь `hit.Parent:FindFirstChild("Humanoid")` |
 | Весь персонаж умирает сразу | Все части касаются одновременно | Это нормально, debounce решает проблему повторного урона |
 | `TakeDamage` не работает | Health уже = 0 | Проверь что `humanoid.Health > 0` перед уроном |
