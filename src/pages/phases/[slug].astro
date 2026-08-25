@@ -1,0 +1,34 @@
+---
+import { getCollection, render } from 'astro:content';
+import PhaseLayout from '../../layouts/PhaseLayout.astro';
+import { sortPhases, extractTitle, countSteps } from '../../lib/course';
+
+export async function getStaticPaths() {
+  const phases = sortPhases(await getCollection('phases'));
+  return phases.map((phase, i) => ({
+    params: { slug: phase.id },
+    props: {
+      phase,
+      prev: phases[i - 1] ?? null,
+      next: phases[i + 1] ?? null,
+    },
+  }));
+}
+
+const { phase, prev, next } = Astro.props;
+const { Content } = await render(phase);
+const title = extractTitle(phase) ?? phase.id;
+
+const toRef = (entry: (typeof phase) | null) =>
+  entry ? { slug: entry.id, title: extractTitle(entry) ?? entry.id } : null;
+---
+
+<PhaseLayout
+  title={title}
+  slug={phase.id}
+  totalSteps={countSteps(phase.body ?? '')}
+  prev={toRef(prev)}
+  next={toRef(next)}
+>
+  <Content />
+</PhaseLayout>

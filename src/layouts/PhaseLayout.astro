@@ -1,0 +1,41 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface PhaseRef {
+  slug: string;
+  title: string;
+}
+
+interface Props {
+  title: string;
+  slug: string;
+  totalSteps: number;
+  prev?: PhaseRef | null;
+  next?: PhaseRef | null;
+}
+
+const { title, slug, totalSteps, prev = null, next = null } = Astro.props;
+const baseUrl = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+
+<BaseLayout title={title} pageSlug={slug}>
+  <article>
+    <slot />
+    <div class="progress-wrap" data-total={totalSteps}>
+      <div class="progress-track"><div class="progress-fill"></div></div>
+      <span class="progress-label">0/{totalSteps} шагов</span>
+    </div>
+  </article>
+  <nav class="prev-next">
+    {
+      prev && (
+        <a href={`${baseUrl}phases/${prev.slug}/`}>← {prev.title}</a>
+      )
+    }
+    {
+      next && (
+        <a class="next-link" href={`${baseUrl}phases/${next.slug}/`}>{next.title} →</a>
+      )
+    }
+  </nav>
+</BaseLayout>

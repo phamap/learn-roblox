@@ -1,0 +1,20 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { extractTitle } from '../../lib/course';
+
+export async function getStaticPaths() {
+  const cheatsheets = await getCollection('cheatsheets');
+  return cheatsheets.map((sheet) => ({ params: { slug: sheet.id }, props: { sheet } }));
+}
+
+const { sheet } = Astro.props;
+const { Content } = await render(sheet);
+const title = extractTitle(sheet) ?? sheet.id;
+---
+
+<BaseLayout title={`${title} — шпаргалка`} pageSlug={sheet.id}>
+  <article>
+    <Content />
+  </article>
+</BaseLayout>

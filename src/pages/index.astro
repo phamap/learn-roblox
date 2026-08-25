@@ -1,0 +1,70 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { sortPhases, extractTitle, countSteps } from '../lib/course';
+
+const planEntries = await getCollection('plan');
+const plan = planEntries[0];
+const phases = sortPhases(await getCollection('phases'));
+const cheatsheets = (await getCollection('cheatsheets')).sort((a, b) =>
+  a.id.localeCompare(b.id)
+);
+
+const { Content } = await render(plan);
+
+const phaseMeta = phases.map((phase, i) => ({
+  slug: phase.id,
+  index: i + 1,
+  title: extractTitle(phase) ?? phase.id,
+  totalSteps: countSteps(phase.body ?? ''),
+}));
+---
+
+<BaseLayout title="Roblox Obby — курс" pageSlug={plan.id}>
+  <Content />
+
+  <section>
+    <h2>Прогресс по фазам</h2>
+    <ol class="phase-grid">
+      {
+        phaseMeta.map((meta) => (
+          <li>
+            <a class="phase-card" href={`phases/${meta.slug}/`}>
+              <span>
+                <strong>Фаза {meta.index}.</strong> {meta.title}
+              </span>
+              <span
+                class="progress-label"
+                data-phase-progress={meta.slug}
+                data-total={meta.totalSteps}
+              >
+                0/{meta.totalSteps} шагов
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+
+    <h2>Шпаргалки</h2>
+    <ul>
+      {
+        cheatsheets.map((sheet) => (
+          <li>
+            <a href={`cheatsheets/${sheet.id}/`}>{extractTitle(sheet) ?? sheet.id}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<script>
+  import { countDone } from '../lib/progress';
+
+  document.querySelectorAll<HTMLElement>('[data-phase-progress]').forEach((el) => {
+    const phaseSlug = el.dataset.phaseProgress ?? '';
+    const total = Number(el.dataset.total ?? 0);
+    el.textContent = `${countDone(phaseSlug, total)}/${total} шагов`;
+  });
+</script>

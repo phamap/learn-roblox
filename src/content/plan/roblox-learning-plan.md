@@ -10,8 +10,8 @@
 
 | Ресурс | Ссылка |
 |--------|--------|
-| Lua шпаргалка | [lua-shpargalka.md](./lua-shpargalka.md) |
-| Roblox шпаргалка | [roblox-shpargalka.md](./roblox-shpargalka.md) |
+| Lua шпаргалка | [lua-shpargalka.md](cheatsheets/lua-for-js/) |
+| Roblox шпаргалка | [roblox-shpargalka.md](cheatsheets/roblox-api/) |
 | Официальные доки | https://create.roblox.com/docs |
 | DevForum | https://devforum.roblox.com |
 
@@ -19,7 +19,7 @@
 
 ## Фаза 1: Знакомство с Studio (недели 1-2)
 
-> 📘 **Подробная инструкция:** [phases/phase-1-studio.md](./phases/phase-1-studio.md)
+> 📘 **Подробная инструкция:** [phases/phase-1-studio.md](phases/phase-1-studio/)
 
 **Цель:** ориентироваться в интерфейсе, создавать простые объекты
 
@@ -37,7 +37,7 @@
 
 ## Фаза 2: Kill Brick + Touched (недели 3-5)
 
-> 📘 **Подробная инструкция:** [phases/phase-2-killbrick.md](./phases/phase-2-killbrick.md)
+> 📘 **Подробная инструкция:** [phases/phase-2-killbrick.md](phases/phase-2-killbrick/)
 
 **Цель:** научиться обрабатывать столкновения, убивать игрока
 
@@ -54,7 +54,7 @@
 
 ## Фаза 3: Движение платформ (недели 5-8)
 
-> 📘 **Подробная инструкция:** [phases/phase-3-tween.md](./phases/phase-3-tween.md)
+> 📘 **Подробная инструкция:** [phases/phase-3-tween.md](phases/phase-3-tween/)
 
 **Цель:** анимировать объекты, создавать динамические препятствия
 
@@ -71,7 +71,7 @@
 
 ## Фаза 4: Чекпоинты и респавн (недели 8-10)
 
-> 📘 **Подробная инструкция:** [phases/phase-4-checkpoints.md](./phases/phase-4-checkpoints.md)
+> 📘 **Подробная инструкция:** [phases/phase-4-checkpoints.md](phases/phase-4-checkpoints/)
 
 **Цель:** сохранять прогресс, правильно респавнить игрока
 
@@ -88,7 +88,7 @@
 
 ## Фаза 5: GUI (недели 10-12)
 
-> 📘 **Подробная инструкция:** [phases/phase-5-gui.md](./phases/phase-5-gui.md)
+> 📘 **Подробная инструкция:** [phases/phase-5-gui.md](phases/phase-5-gui/)
 
 **Цель:** показывать информацию игроку, делать интерактивные элементы
 
@@ -105,7 +105,7 @@
 
 ## Фаза 5.5: RemoteEvent + клиент-сервер (недели 12-13)
 
-> 📘 **Подробная инструкция:** [phases/phase-5-5-remote.md](./phases/phase-5-5-remote.md)
+> 📘 **Подробная инструкция:** [phases/phase-5-5-remote.md](phases/phase-5-5-remote/)
 
 **Цель:** научиться передавать данные между сервером и клиентом
 
@@ -122,7 +122,7 @@
 
 ## Фаза 6: Сохранение данных (недели 13-15)
 
-> 📘 **Подробная инструкция:** [phases/phase-6-datastore.md](./phases/phase-6-datastore.md)
+> 📘 **Подробная инструкция:** [phases/phase-6-datastore.md](phases/phase-6-datastore/)
 
 **Цель:** данные сохраняются между сессиями
 
@@ -139,7 +139,7 @@
 
 ## Фаза 7: Полировка (недели 15-17)
 
-> 📘 **Подробная инструкция:** [phases/phase-7-polish.md](./phases/phase-7-polish.md)
+> 📘 **Подробная инструкция:** [phases/phase-7-polish.md](phases/phase-7-polish/)
 
 **Цель:** игра выглядит и звучит хорошо
 
@@ -156,7 +156,7 @@
 
 ## Фаза 7.5: Оптимизация производительности (недели 17-18)
 
-> 📘 **Подробная инструкция:** [phases/phase-7-5-optimization.md](./phases/phase-7-5-optimization.md)
+> 📘 **Подробная инструкция:** [phases/phase-7-5-optimization.md](phases/phase-7-5-optimization/)
 
 **Цель:** игра работает без лагов
 
@@ -173,7 +173,7 @@
 
 ## Фаза 8: Публикация (недели 18-20)
 
-> 📘 **Подробная инструкция:** [phases/phase-8-publish.md](./phases/phase-8-publish.md)
+> 📘 **Подробная инструкция:** [phases/phase-8-publish.md](phases/phase-8-publish/)
 
 **Цель:** игра доступна другим
 
