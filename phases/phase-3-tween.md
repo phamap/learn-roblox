@@ -266,7 +266,7 @@ local tweenInfo = TweenInfo.new(
 ### 5.3 Проверить состояние
 
 ```lua
-if tween playbackState == Enum.PlaybackState.Playing then
+if tween.PlaybackState == Enum.PlaybackState.Playing then
     print("Tween играет")
 end
 ```

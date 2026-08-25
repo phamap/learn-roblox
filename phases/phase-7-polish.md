@@ -148,7 +148,7 @@ emitter.SpreadAngle = Vector2.new(360, 360)
 emitter.Parent = checkpoint
 ```
 
-### 3.2 Эмиттер для.kill brick
+### 3.2 Эмиттер для kill brick
 
 ```lua
 -- Огненные частицы для kill brick

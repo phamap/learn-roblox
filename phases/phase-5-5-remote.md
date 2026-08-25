@@ -199,7 +199,7 @@ deathCountEvent.OnServerEvent:Connect(function(player, action)
 end)
 
 -- ХОРОШО: клиент говорит "я хочу нанести урон"
--- Сервер проверяет расстояние и有限
+-- Сервер проверяет расстояние и лимиты
 deathCountEvent.OnServerEvent:Connect(function(player, action, amount)
     if action == "damage" then
         -- Проверяем: игрок рядом с целью?
