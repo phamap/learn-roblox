@@ -2,9 +2,13 @@
 
 Учебный курс по разработке игры-обби в Roblox Studio. Контент написан в markdown, сайт собирается [Astro](https://astro.build) и публикуется на GitHub Pages.
 
-**Сайт:** https://phamap.github.io/learn-roblox/
+**Сайт:**
+- https://learn-roblox.surge.sh/ — зеркало, доступное из РФ без VPN
+- https://phamap.github.io/learn-roblox/ — канонический адрес (GitHub Pages)
 
 Возможности: рендеринг гайдов с подсветкой Luau, навигация по фазам, интерактивные чекбоксы шагов с сохранением прогресса в браузере (localStorage).
+
+> Прогресс привязан к домену: отметки на surge.sh и на github.io хранятся отдельно.
 
 ## Структура
 
@@ -45,4 +49,15 @@ npm run dev     # дев-сервер на http://localhost:4321, hot-reload к�
 
 ## Деплой
 
-Push в `main` запускает GitHub Actions: установка зависимостей, `astro build`, публикация в GitHub Pages. Артефакты сборки (`dist/`) не коммитятся.
+Push в `main` запускает два независимых workflow:
+
+| Workflow | Куда | Адрес |
+|---|---|---|
+| `deploy.yml` | GitHub Pages (Actions) | `phamap.github.io/learn-roblox/` |
+| `deploy-surge.yml` | Surge | `learn-roblox.surge.sh` |
+
+Base path задаётся переменной окружения `SITE_BASE`: на Pages — `/learn-roblox` (умолчание), на Surge — `/`.
+
+### Секреты деплоя на Surge
+
+Один раз: зарегистрироваться (`npx surge login`), получить токен (`npx surge --token`), затем в GitHub → Settings → Secrets and variables → Actions добавить `SURGE_LOGIN` и `SURGE_TOKEN`.

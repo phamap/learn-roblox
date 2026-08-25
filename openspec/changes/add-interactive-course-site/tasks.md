@@ -2,11 +2,11 @@
 
 - [x] 1.1 Создать Astro-проект в корне репозитория (npm create astro, минимальный шаблон, TypeScript), проверить `npm run dev` на localhost
 - [x] 1.2 Добавить `.gitignore` для `node_modules/`, `dist/`, `.astro/`
-- [ ] 1.3 Настроить `astro.config.mjs`: `site` под GitHub Pages (`<username>.github.io/<repo>`), базовый путь, встроенный Shiki с языком lua
+- [x] 1.3 Настроить `astro.config.mjs`: `site` под GitHub Pages (`<username>.github.io/<repo>`), базовый путь, встроенный Shiki с языком lua
 
 ## 2. Контент и коллекции
 
-- [ ] 2.1 Определить Content Collections в `src/content.config.ts` для plan, phases, cheatsheets
+- [x] 2.1 Определить Content Collections в `src/content.config.ts` для plan, phases, cheatsheets
 - [x] 2.2 Перенести файлы через `git mv`: `roblox-learning-plan.md` → `src/content/plan/`, `phases/*.md` → `src/content/phases/`, шпаргалки → `src/content/cheatsheets/` (с переименованием в латиницу)
 - [x] 2.3 Обновить внутренние md-ссылки между перенесёнными файлами на новые пути
 - [x] 2.4 Убедиться, что сборка проходит и контент рендерится без изменений
@@ -32,5 +32,5 @@
 
 - [x] 5.1 Написать workflow `.github/workflows/deploy.yml`: install → build → deploy на Pages (actions/deploy-pages)
 - [x] 5.2 Переписать README.md в техническую документацию репозитория (структура, как разрабатывать, ссылка на сайт)
-- [ ] 5.3 Сделать репозиторий публичным, включить GitHub Pages (режим GitHub Actions) в настройках
-- [ ] 5.4 Запушить и убедиться, что сайт доступен по ссылке и деплой проходит автоматически при следующей правке контента
+- [x] 5.3 Сделать репозиторий публичным, включить GitHub Pages (режим GitHub Actions) в настройках
+- [x] 5.4 Запушить и убедиться, что сайт доступен по ссылке и деплой проходит автоматически при следующей правке контента

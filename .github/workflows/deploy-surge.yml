@@ -1,0 +1,33 @@
+name: Deploy to Surge
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: surge
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build (root base path for surge.sh)
+        run: npm run build
+        env:
+          SITE_BASE: /
+      - name: Deploy to learn-roblox.surge.sh
+        run: npx surge ./dist --domain learn-roblox.surge.sh --token "$SURGE_TOKEN"
+        env:
+          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
+          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
