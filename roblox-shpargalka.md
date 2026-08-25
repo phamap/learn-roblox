@@ -104,7 +104,57 @@ part.Parent = workspace
 
 ---
 
-## 5. Kill Brick
+## 5. Минимальный API (что понадобится в первом Obby)
+
+### События
+
+```lua
+local part = script.Parent
+part.Touched:Connect(function(otherPart)
+    print("кто-то коснулся:", otherPart.Name)
+end)
+```
+
+Все события подключаются через `:Connect(функция)`.
+
+### Таймеры
+
+```lua
+task.wait(1)          -- пауза 1 сек (внутри скрипта)
+task.wait()           -- 1 кадр (сокращение от task.wait(0.03))
+
+-- цикл каждые 2 секунды
+while true do
+    print("тик")
+    task.wait(2)
+end
+```
+
+---
+
+## 6. Стартовый «скелет» первой игры
+
+```lua
+-- Script в ServerScriptService
+local Players = game:GetService("Players")
+local TNT = game:GetService("ReplicatedStorage").Bomb   -- модель бомбы
+
+Players.PlayerAdded:Connect(function(player)
+    print(player.Name .. " вошёл в игру!")
+end)
+
+-- спавн бомбы каждые 5 секунд
+while true do
+    local bomb = TNT:Clone()
+    bomb.Parent = workspace
+    bomb.Position = Vector3.new(0, 10, 0)
+    task.wait(5)
+end
+```
+
+---
+
+## 7. Kill Brick
 
 Классический паттерн для Obby — коснулся = умер.
 
@@ -130,7 +180,7 @@ end)
 
 ---
 
-## 6. TweenService — анимация
+## 8. TweenService — анимация
 
 Плавное движение/изменение свойств без циклов.
 
@@ -167,7 +217,7 @@ tween:Play()
 
 ---
 
-## 7. Checkpoint система
+## 9. Checkpoint система
 
 ### SpawnLocation
 
@@ -208,7 +258,7 @@ end)
 
 ---
 
-## 8. Humanoid — здоровье и смерть
+## 10. Humanoid — здоровье и смерть
 
 ```lua
 local humanoid = character:FindFirstChild("Humanoid")
@@ -232,7 +282,7 @@ end)
 
 ---
 
-## 9. Респавн
+## 11. Респавн
 
 ```lua
 local Players = game:GetService("Players")
@@ -252,7 +302,7 @@ end)
 
 ---
 
-## 10. GUI — интерфейс
+## 12. GUI — интерфейс
 
 ### Базовая структура
 
@@ -287,7 +337,7 @@ end)
 
 ---
 
-## 11. DataStore — сохранение данных
+## 13. DataStore — сохранение данных
 
 ```lua
 -- Серверный скрипт
@@ -322,7 +372,7 @@ end)
 
 ---
 
-## 12. RemoteEvent — клиент-сервер
+## 14. RemoteEvent — клиент-сервер
 
 ```lua
 -- ReplicatedStorage → RemoteEvent
@@ -340,7 +390,7 @@ remote:FireServer("привет от клиента")
 
 ---
 
-## 13. Debugging
+## 15. Debugging
 
 | Инструмент | Где | Как |
 |------------|-----|-----|
@@ -352,7 +402,7 @@ remote:FireServer("привет от клиента")
 
 ---
 
-## 14. Модели из Toolbox
+## 16. Модели из Toolbox
 
 | Категория | Что искать | Зачем |
 |-----------|-----------|-------|
@@ -368,11 +418,11 @@ remote:FireServer("привет от клиента")
 
 ---
 
-## 15. Грабли Obby
+## 17. Грабли Obby
 
 | Симптом | Причина | Решение |
 |---------|---------|---------|
-| Kill brick не работает | `CanCollide = false` или нет физики | Проверь CanCollide, двигается ли часть |
+| Kill brick не работает | Часть не Anchored или нет физики | Проверь Anchored, двигается ли часть |
 | Платформа не двигается | `Anchored = false` | Для Tween нужно Anchored = true |
 | Tween дёргается | Нет debounce | Добавь флаг debounce |
 | Чекпоинт не сохраняется | Нет `Neutral = true` | Настрой SpawnLocation |

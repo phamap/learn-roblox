@@ -132,7 +132,7 @@ end
 if hp <= 0 then
     print("мертв")
 elseif hp < 30 then
-    print("с较но")
+    print("серьёзно")
 elseif hp < 70 then
     print("ранен")
 else
