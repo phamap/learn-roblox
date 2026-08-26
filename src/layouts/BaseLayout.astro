@@ -285,13 +285,13 @@ const isHome = pageSlug === '';
     font-variant-numeric: tabular-nums;
   }
 
-  /* Список фаз на главной */
+  /* Bento-плитки фаз на главной */
   .phase-grid {
     list-style: none;
     padding: 0;
     margin: 16px 0 32px;
     display: grid;
-    gap: 12px;
+    gap: 16px;
     grid-template-columns: 1fr;
   }
 
@@ -303,32 +303,20 @@ const isHome = pageSlug === '';
 
   .phase-card {
     display: flex;
-    align-items: center;
-    gap: 14px;
+    flex-direction: column;
+    gap: 10px;
     height: 100%;
-    padding: 14px 16px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    padding: 20px;
+    background: var(--bg-soft);
+    border-radius: 16px;
     text-decoration: none;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition: transform 0.15s ease, box-shadow 0.15s ease,
+      background-color 0.15s ease;
   }
 
   .phase-card:hover {
-    background: var(--bg-soft);
-    border-color: var(--cyan);
-  }
-
-  .phase-card .progress-label {
-    flex-shrink: 0;
-  }
-
-  /* Состояния карточек фаз */
-  .phase-card.in-progress {
-    border-color: var(--accent);
-  }
-
-  .phase-card.done {
-    border-color: var(--green);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(7, 54, 66, 0.12);
   }
 
   /* Prev / next */
