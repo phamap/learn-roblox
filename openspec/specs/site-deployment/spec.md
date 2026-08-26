@@ -1,7 +1,7 @@
 # site-deployment Specification
 
 ## Purpose
-TBD - created by archiving change add-interactive-course-site. Update Purpose after archive.
+Деплой сайта курса: автоматическая сборка и публикация на GitHub Pages (канонический адрес) с настраиваемым base path.
 ## Requirements
 ### Requirement: Автоматический деплой при push
 При push в основную ветку репозитория GitHub Actions SHALL выполнять сборку сайта и публиковать его на GitHub Pages.
@@ -16,4 +16,15 @@ TBD - created by archiving change add-interactive-course-site. Update Purpose af
 #### Scenario: Чистый репозиторий
 - **WHEN** выполняется деплой-пайплайн
 - **THEN** сборка происходит из исходников, и в истории git отсутствуют сгенерированные файлы
+
+### Requirement: Настраиваемый base path
+Base path сайта SHALL задаваться переменной окружения `SITE_BASE`. При отсутствии переменной base MUST равняться `/learn-roblox` (требование GitHub Pages для project pages).
+
+#### Scenario: GitHub Pages использует префикс по умолчанию
+- **WHEN** сборка выполняется без переменной `SITE_BASE`
+- **THEN** все абсолютные ссылки и пути ресурсов используют префикс `/learn-roblox/`
+
+#### Scenario: Зеркало от корня
+- **WHEN** сборка выполняется с `SITE_BASE=/`
+- **THEN** сайт работает от корня домена без префикса, а внутренние ссылки остаются рабочими
 
