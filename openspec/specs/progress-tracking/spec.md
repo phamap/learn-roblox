@@ -1,7 +1,7 @@
 # progress-tracking Specification
 
 ## Purpose
-TBD - created by archiving change add-interactive-course-site. Update Purpose after archive.
+Интерактивность курса: кликабельные чекбоксы шагов с сохранением прогресса в браузере (localStorage через единый модуль progress.ts) и индикаторы прогресса по фазам.
 ## Requirements
 ### Requirement: Интерактивные чекбоксы шагов
 Чекбоксы шагов (`- [ ]` / `- [x]`) в отрендеренных гайдах фаз SHALL быть кликабельными. Состояние чекбокса SHALL сохраняться между визитами.

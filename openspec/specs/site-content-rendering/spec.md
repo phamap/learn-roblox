@@ -1,7 +1,7 @@
 # site-content-rendering Specification
 
 ## Purpose
-TBD - created by archiving change add-interactive-course-site. Update Purpose after archive.
+Читалка курса: сборка markdown-контента (план, фазы, шпаргалки) в статический сайт с подсветкой Luau и навигацией между фазами.
 ## Requirements
 ### Requirement: Рендеринг контента курса из markdown
 Сайт SHALL собираться из существующих markdown-файлов курса (план, фазы, шпаргалки) без изменения их содержимого. Markdown-файлы SHALL располагаться в `src/content/` и регистрироваться как Astro Content Collections.

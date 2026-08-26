@@ -1,7 +1,8 @@
 # surge-mirror-deployment Specification
 
 ## Purpose
-TBD - created by archiving change add-surge-mirror. Update Purpose after archive.
+Зеркало сайта на Surge: автоматический деплой при push в основную ветку по фиксированному адресу `learn-roblox.surge.sh`, доступному из РФ без VPN.
+
 ## Requirements
 ### Requirement: Публикация зеркала на Surge
 Сайт SHALL автоматически собираться и публиковаться на `learn-roblox.surge.sh` при push в основную ветку репозитория, параллельно с существующим деплоем на GitHub Pages.
