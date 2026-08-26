@@ -9,6 +9,7 @@ export default defineConfig({
   base,
   markdown: {
     shikiConfig: {
+      theme: 'solarized-dark',
       langs: ['lua', 'bash', 'json'],
     },
   },

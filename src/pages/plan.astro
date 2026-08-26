@@ -1,0 +1,155 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { sortPhases, countSteps } from '../lib/course';
+
+const planEntries = await getCollection('plan');
+const plan = planEntries[0];
+const { Content } = await render(plan);
+
+const phases = sortPhases(await getCollection('phases'));
+const phaseMeta = phases.map((phase) => {
+  const nums: string[] = [];
+  for (const part of phase.id.split('-').slice(1)) {
+    if (/^\d+$/.test(part)) nums.push(part);
+    else break;
+  }
+  return {
+    num: nums.join('.'),
+    slug: phase.id,
+    totalSteps: countSteps(phase.body ?? ''),
+  };
+});
+---
+
+<BaseLayout title="Полный план обучения — Roblox Obby" pageSlug={plan.id}>
+  <article>
+    <Content />
+  </article>
+  <script type="application/json" is:inline id="phase-meta" set:html={JSON.stringify(phaseMeta)} />
+</BaseLayout>
+
+<script>
+  import { countDone } from '../lib/progress';
+
+  interface PhaseInfo {
+    num: string;
+    slug: string;
+    totalSteps: number;
+  }
+
+  let meta: PhaseInfo[] = [];
+  try {
+    meta = JSON.parse(document.getElementById('phase-meta')?.textContent ?? '[]') as PhaseInfo[];
+  } catch {
+    meta = [];
+  }
+
+  document.querySelectorAll<HTMLHeadingElement>('article h2').forEach((h2) => {
+    const match = h2.textContent?.match(/Фаза\s+(\d+(?:\.\d+)?)/);
+    if (!match) return;
+    const info = meta.find((m) => m.num === match[1]);
+    if (!info || info.totalSteps === 0) return;
+
+    const done = countDone(info.slug, info.totalSteps);
+
+    const badge = document.createElement('span');
+    badge.className = 'phase-status';
+    if (done >= info.totalSteps) {
+      badge.classList.add('done');
+      badge.textContent = 'Изучено';
+    } else if (done > 0) {
+      badge.classList.add('in-progress');
+      badge.textContent = `В процессе ${done}/${info.totalSteps}`;
+    } else {
+      badge.classList.add('not-started');
+      badge.textContent = 'Не начата';
+    }
+    h2.appendChild(badge);
+
+    let stepIndex = 0;
+    let sibling = h2.nextElementSibling;
+    while (sibling && sibling.tagName !== 'H2') {
+      sibling
+        .querySelectorAll<HTMLLIElement>(':scope > li > input[type="checkbox"]')
+        .forEach((input) => {
+          const li = input.parentElement;
+          if (!li) return;
+          if (stepIndex < done) li.classList.add('step-done');
+          stepIndex++;
+        });
+      sibling = sibling.nextElementSibling;
+    }
+  });
+</script>
+
+<style is:global>
+  /* Чекбоксы на странице плана неинтерактивны: скрываем, возвращаем маркеры списка */
+  article li > input[type='checkbox'] {
+    display: none;
+  }
+
+  article li:has(> input[type='checkbox']),
+  article li:has(> input[type='checkbox']:checked) {
+    list-style: disc;
+    margin-left: 0;
+    color: var(--text);
+  }
+
+  article li:has(> input[type='checkbox']:checked)::marker,
+  article li:has(> input[type='checkbox']:checked) > label:has(+ *) {
+    opacity: 1;
+  }
+
+  /* Пройденные пункты (первые N по порядку, где N — прогресс фазы) */
+  article li.step-done {
+    color: var(--muted);
+  }
+
+  article li.step-done::marker {
+    color: var(--green);
+  }
+
+  .phase-status {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 12px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    color: var(--text);
+    font-size: 0.62em;
+    font-weight: 600;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .phase-status::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    background: var(--muted);
+  }
+
+  .phase-status.done::before {
+    background: var(--green);
+  }
+
+  .phase-status.in-progress::before {
+    background: var(--accent);
+  }
+
+  .phase-status.done {
+    border-color: var(--green);
+    color: var(--heading);
+  }
+
+  .phase-status.in-progress {
+    border-color: var(--accent);
+    color: var(--heading);
+  }
+</style>

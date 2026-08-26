@@ -1,16 +1,12 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { sortPhases, extractTitle, countSteps } from '../lib/course';
 
-const planEntries = await getCollection('plan');
-const plan = planEntries[0];
 const phases = sortPhases(await getCollection('phases'));
 const cheatsheets = (await getCollection('cheatsheets')).sort((a, b) =>
   a.id.localeCompare(b.id)
 );
-
-const { Content } = await render(plan);
 
 const phaseMeta = phases.map((phase, i) => ({
   slug: phase.id,
@@ -18,28 +14,45 @@ const phaseMeta = phases.map((phase, i) => ({
   title: extractTitle(phase) ?? phase.id,
   totalSteps: countSteps(phase.body ?? ''),
 }));
+
+const totalAllSteps = phaseMeta.reduce((sum, m) => sum + m.totalSteps, 0);
 ---
 
-<BaseLayout title="Roblox Obby — курс" pageSlug={plan.id}>
-  <Content />
+<BaseLayout title="Roblox Obby — курс">
+  <header class="dash-head">
+    <h1>Roblox Obby — курс</h1>
+    <p class="dash-lead">
+      Практический план обучения разработке игр в Roblox Studio: за 18–20 недель вы
+      пройдёте путь от первого Part до опубликованной Obby-игры. Каждая фаза — это
+      теория, пошаговые задания с чекбоксами и мини-проект. Прогресс сохраняется
+      в браузере — отмечайте шаги и возвращайтесь, когда удобно.
+    </p>
+    <div class="progress-wrap overall-progress" data-overall data-total={totalAllSteps}>
+      <div class="progress-track"><div class="progress-fill"></div></div>
+      <span class="progress-label">0/{totalAllSteps} шагов</span>
+    </div>
+  </header>
 
   <section>
-    <h2>Прогресс по фазам</h2>
+    <h2>Фазы</h2>
     <ol class="phase-grid">
       {
         phaseMeta.map((meta) => (
           <li>
-            <a class="phase-card" href={`phases/${meta.slug}/`}>
-              <span>
-                <strong>Фаза {meta.index}.</strong> {meta.title}
+            <a
+              class="phase-card"
+              href={`phases/${meta.slug}/`}
+              data-phase-card={meta.slug}
+              data-total={meta.totalSteps}
+            >
+              <span class="phase-num">{meta.index}</span>
+              <span class="phase-info">
+                <span class="phase-title">{meta.title}</span>
+                <span class="phase-track">
+                  <span class="phase-fill"></span>
+                </span>
               </span>
-              <span
-                class="progress-label"
-                data-phase-progress={meta.slug}
-                data-total={meta.totalSteps}
-              >
-                0/{meta.totalSteps} шагов
-              </span>
+              <span class="progress-label">0/{meta.totalSteps} шагов</span>
             </a>
           </li>
         ))
@@ -47,7 +60,7 @@ const phaseMeta = phases.map((phase, i) => ({
     </ol>
 
     <h2>Шпаргалки</h2>
-    <ul>
+    <ul class="cheats-list">
       {
         cheatsheets.map((sheet) => (
           <li>
@@ -56,15 +69,148 @@ const phaseMeta = phases.map((phase, i) => ({
         ))
       }
     </ul>
+
+    <p class="plan-link">
+      <a href="plan/">Читать полный план →</a>
+    </p>
   </section>
 </BaseLayout>
 
 <script>
   import { countDone } from '../lib/progress';
 
-  document.querySelectorAll<HTMLElement>('[data-phase-progress]').forEach((el) => {
-    const phaseSlug = el.dataset.phaseProgress ?? '';
+  let totalDone = 0;
+  let totalSteps = 0;
+
+  document.querySelectorAll<HTMLAnchorElement>('[data-phase-card]').forEach((el) => {
+    const phaseSlug = el.dataset.phaseCard ?? '';
     const total = Number(el.dataset.total ?? 0);
-    el.textContent = `${countDone(phaseSlug, total)}/${total} шагов`;
+    const done = countDone(phaseSlug, total);
+    totalDone += done;
+    totalSteps += total;
+
+    const label = el.querySelector<HTMLElement>('.progress-label');
+    const fill = el.querySelector<HTMLElement>('.phase-fill');
+    if (label) label.textContent = `${done}/${total} шагов`;
+    if (fill) fill.style.width = total ? `${Math.round((done / total) * 100)}%` : '0%';
+
+    if (total > 0 && done >= total) el.classList.add('done');
+    else if (done > 0) el.classList.add('in-progress');
   });
+
+  const overall = document.querySelector<HTMLElement>('.overall-progress[data-overall]');
+  if (overall) {
+    const label = overall.querySelector<HTMLElement>('.progress-label');
+    const fill = overall.querySelector<HTMLElement>('.progress-fill');
+    if (label) label.textContent = `${totalDone}/${totalSteps} шагов`;
+    if (fill)
+      fill.style.width = totalSteps ? `${Math.round((totalDone / totalSteps) * 100)}%` : '0%';
+  }
 </script>
+
+<style is:global>
+  .dash-head h1 {
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+
+  .dash-lead {
+    color: var(--muted);
+    max-width: 640px;
+    font-size: 1.06em;
+    margin: 0 0 24px;
+  }
+
+  .overall-progress {
+    max-width: 480px;
+  }
+
+  .overall-progress .progress-label {
+    font-weight: 600;
+    color: var(--heading);
+  }
+
+  .phase-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    color: var(--heading);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .phase-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .phase-title {
+    color: var(--heading);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .phase-track {
+    height: 4px;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .phase-fill {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: var(--green);
+    transition: width 0.25s ease;
+  }
+
+  .phase-card.done .phase-num {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fdf6e3;
+  }
+
+  .cheats-list {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 24px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .cheats-list a {
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .cheats-list a:hover {
+    text-decoration: underline;
+  }
+
+  .plan-link {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .plan-link a {
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .plan-link a:hover {
+    text-decoration: underline;
+  }
+</style>
