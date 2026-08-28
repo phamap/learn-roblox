@@ -19,6 +19,16 @@ const { phase, prev, next } = Astro.props;
 const { Content } = await render(phase);
 const title = extractTitle(phase) ?? phase.id;
 
+const STEP_RE = /^##\s+Шаг\s+(\d+(?:\.\d+)?)\s*:?\s*(.*)$/gm;
+const steps: { n: string; title: string }[] = [];
+let m: RegExpExecArray | null;
+while ((m = STEP_RE.exec(phase.body ?? '')) !== null) {
+  steps.push({ n: m[1], title: m[2].trim() });
+}
+
+const phaseMatch = phase.id.match(/^phase-(\d+(?:\.\d+)?)/);
+const phaseNumber = phaseMatch ? phaseMatch[1] : '';
+
 const toRef = (entry: (typeof phase) | null) =>
   entry ? { slug: entry.id, title: extractTitle(entry) ?? entry.id } : null;
 ---
@@ -26,6 +36,8 @@ const toRef = (entry: (typeof phase) | null) =>
 <PhaseLayout
   title={title}
   slug={phase.id}
+  phaseNumber={phaseNumber}
+  steps={steps}
   totalSteps={countSteps(phase.body ?? '')}
   prev={toRef(prev)}
   next={toRef(next)}

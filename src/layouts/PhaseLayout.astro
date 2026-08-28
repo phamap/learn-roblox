@@ -6,26 +6,57 @@ interface PhaseRef {
   title: string;
 }
 
+interface Step {
+  n: string;
+  title: string;
+}
+
 interface Props {
   title: string;
   slug: string;
+  phaseNumber?: string;
+  steps?: Step[];
   totalSteps: number;
   prev?: PhaseRef | null;
   next?: PhaseRef | null;
 }
 
-const { title, slug, totalSteps, prev = null, next = null } = Astro.props;
+const { title, slug, phaseNumber = '', steps = [], totalSteps, prev = null, next = null } = Astro.props;
 const baseUrl = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+
+const stepId = (n: string) => `step-${n.replace(/\./g, '-')}`;
 ---
 
-<BaseLayout title={title} pageSlug={slug}>
-  <article>
-    <slot />
-    <div class="progress-wrap" data-total={totalSteps}>
-      <div class="progress-track"><div class="progress-fill"></div></div>
-      <span class="progress-label">0/{totalSteps} шагов</span>
-    </div>
-  </article>
+<BaseLayout
+  title={title}
+  pageSlug={slug}
+  reading={steps.length ? { phase: phaseNumber, steps, total: steps.length } : undefined}
+>
+  <div class="phase-grid-wrap">
+    {
+      steps.length > 0 && (
+        <nav class="step-rail" aria-label="Шаги фазы">
+          <ul>
+            {steps.map((s, i) => (
+              <li>
+                <a href={`#${stepId(s.n)}`} data-step={stepId(s.n)}>
+                  <span class="step-badge">{s.n}</span>
+                  <span class="step-title">{s.title || `Шаг ${s.n}`}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )
+    }
+    <article>
+      <slot />
+      <div class="progress-wrap" data-total={totalSteps}>
+        <div class="progress-track"><div class="progress-fill"></div></div>
+        <span class="progress-label">0/{totalSteps} шагов</span>
+      </div>
+    </article>
+  </div>
   <nav class="prev-next">
     {
       prev && (

@@ -1,14 +1,28 @@
 ---
+interface Step {
+  n: string;
+  title: string;
+}
+
+interface ReadingInfo {
+  phase: string;
+  steps: Step[];
+  total: number;
+}
+
 interface Props {
   title: string;
   description?: string;
   pageSlug?: string;
+  reading?: ReadingInfo;
 }
 
-const { title, description = 'Интерактивный курс по разработке Obby в Roblox Studio', pageSlug = '' } = Astro.props;
+const { title, description = 'Интерактивный курс по разработке Obby в Roblox Studio', pageSlug = '', reading } = Astro.props;
 const homeUrl = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 const planUrl = `${homeUrl}plan/`;
 const isHome = pageSlug === '';
+
+const stepId = (n: string) => `step-${n.replace(/\./g, '-')}`;
 ---
 
 <!doctype html>
@@ -20,16 +34,47 @@ const isHome = pageSlug === '';
     <link rel="icon" type="image/svg+xml" href={`${homeUrl}favicon.svg`} />
     <title>{title}</title>
   </head>
-  <body data-page-slug={pageSlug}>
-    <header class="site-header">
-      <div class="container header-inner">
-        <a class="home-link" href={homeUrl}>🎮 Roblox Obby</a>
-        <nav class="site-nav">
-          <a href={homeUrl} aria-current={isHome ? 'page' : undefined}>Главная</a>
-          <a href={planUrl} aria-current={pageSlug === 'roblox-learning-plan' ? 'page' : undefined}>Полный план</a>
-        </nav>
-      </div>
-    </header>
+  <body data-page-slug={pageSlug} class={reading ? 'has-rail' : undefined}>
+    <div class="topbar">
+      <header class="site-header">
+        <div class="container header-inner">
+          <a class="home-link" href={homeUrl}>🎮 Roblox Obby</a>
+          <nav class="site-nav">
+            <a href={homeUrl} aria-current={isHome ? 'page' : undefined}>Главная</a>
+            <a href={planUrl} aria-current={pageSlug === 'roblox-learning-plan' ? 'page' : undefined}>Полный план</a>
+          </nav>
+        </div>
+      </header>
+      {
+        reading && (
+          <div class="reading-bar">
+            <div class="container reading-bar-inner">
+              <div class="reading-meta">
+                <span class="reading-phase">Фаза {reading.phase}</span>
+                <span class="reading-step">Шаг 1/{reading.total}</span>
+              </div>
+              <div class="reading-track"><div class="reading-fill"></div></div>
+              <details class="step-select">
+                <summary class="step-select-summary">
+                  <span class="step-select-label">Шаг 1/{reading.total}</span>
+                  <span class="step-select-caret" aria-hidden="true">▾</span>
+                </summary>
+                <ul>
+                  {reading.steps.map((s, i) => (
+                    <li>
+                      <a href={`#${stepId(s.n)}`} data-step={stepId(s.n)}>
+                        <span class="step-badge">{s.n}</span>
+                        <span class="step-title">{s.title || `Шаг ${s.n}`}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </div>
+          </div>
+        )
+      }
+    </div>
     <main class="container">
       <slot />
     </main>
@@ -72,6 +117,92 @@ const isHome = pageSlug === '';
 
   subscribe(refreshProgress);
   refreshProgress();
+
+  /* Точная высота sticky-блока → корректные отступы у rail и заголовков */
+  const topbar = document.querySelector<HTMLElement>('.topbar');
+  if (topbar) {
+    const syncTopbarHeight = () => {
+      document.documentElement.style.setProperty('--topbar-h', `${topbar.offsetHeight}px`);
+    };
+    syncTopbarHeight();
+    window.addEventListener('resize', syncTopbarHeight);
+  }
+
+  /* Навигация по шагам фазы: scroll-spy + индикатор % прокрутки */
+  const readingBar = document.querySelector<HTMLElement>('.reading-bar');
+  if (readingBar) {
+    const stepHeadings = Array.from(
+      document.querySelectorAll<HTMLElement>('article [data-step]')
+    );
+    const total = stepHeadings.length;
+    if (total > 0) {
+      const fill = document.querySelector<HTMLElement>('.reading-fill');
+      const stepLabel = document.querySelector<HTMLElement>('.reading-step');
+      const selectLabel = document.querySelector<HTMLElement>('.step-select-label');
+      const links = Array.from(
+        document.querySelectorAll<HTMLAnchorElement>('.step-rail a[data-step], .step-select a[data-step]')
+      );
+
+      let currentId = stepHeadings[0].id;
+
+      function setCurrent(id: string): void {
+        const idx = stepHeadings.findIndex((h) => h.id === id);
+        if (idx < 0) return;
+        currentId = id;
+        const k = idx + 1;
+        const text = `Шаг ${k}/${total}`;
+        if (stepLabel) stepLabel.textContent = text;
+        if (selectLabel) selectLabel.textContent = text;
+        links.forEach((a) => {
+          const isCurrent = a.dataset.step === id;
+          a.classList.toggle('current', isCurrent);
+          a.classList.toggle('past', stepHeadings.findIndex((h) => stepId(h) === a.dataset.step) < idx);
+        });
+      }
+
+      function stepId(h: HTMLElement): string {
+        return h.id;
+      }
+
+      const visible = new Set<string>();
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            const id = (e.target as HTMLElement).id;
+            if (e.isIntersecting) visible.add(id);
+            else visible.delete(id);
+          });
+          const visibleHeads = stepHeadings.filter((h) => visible.has(h.id));
+          if (visibleHeads.length) {
+            visibleHeads.sort(
+              (a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top
+            );
+            setCurrent(visibleHeads[0].id);
+          }
+        },
+        { rootMargin: '-10% 0px -60% 0px', threshold: 0 }
+      );
+      stepHeadings.forEach((h) => io.observe(h));
+
+      function onScroll(): void {
+        const doc = document.documentElement;
+        const max = doc.scrollHeight - doc.clientHeight;
+        const pct = max > 0 ? (doc.scrollTop / max) * 100 : 0;
+        if (fill) fill.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+        if (max - doc.scrollTop < 4) setCurrent(stepHeadings[total - 1].id);
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+      setCurrent(currentId);
+
+      links.forEach((a) => {
+        a.addEventListener('click', () => {
+          const details = a.closest('details');
+          if (details) details.open = false;
+        });
+      });
+    }
+  }
 </script>
 
 <style is:global>
@@ -86,6 +217,7 @@ const isHome = pageSlug === '';
     --accent: #268bd2; /* blue */
     --green: #859900; /* green */
     --cyan: #2aa198; /* cyan */
+    --topbar-h: 96px; /* высота sticky-блока (header + reading-bar) */
   }
 
   * {
@@ -94,6 +226,13 @@ const isHome = pageSlug === '';
 
   html {
     font-size: 17px;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
 
   body {
@@ -178,7 +317,7 @@ const isHome = pageSlug === '';
 
   h1,
   h2 {
-    scroll-margin-top: 16px;
+    scroll-margin-top: calc(var(--topbar-h) + 28px);
   }
 
   a {
@@ -336,5 +475,233 @@ const isHome = pageSlug === '';
   .prev-next .next-link {
     margin-left: auto;
     text-align: right;
+  }
+
+  /* Sticky-блок: шапка + индикатор чтения */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 0 rgba(7, 54, 66, 0.04);
+  }
+
+  .reading-bar {
+    border-top: 1px solid var(--border);
+  }
+
+  .reading-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .reading-meta {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .reading-phase {
+    font-size: 0.78em;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .reading-step {
+    font-weight: 700;
+    color: var(--heading);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .reading-track {
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .reading-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.15s ease;
+  }
+
+  /* Мобильный выпадающий аналог rail */
+  .step-select {
+    display: none;
+    position: relative;
+  }
+
+  .step-select-summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--heading);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .step-select-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .step-select ul {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(7, 54, 66, 0.16);
+    max-height: 60vh;
+    overflow-y: auto;
+    min-width: 240px;
+  }
+
+  .step-select li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .step-select li a:hover {
+    background: var(--bg-soft);
+  }
+
+  .step-select li a.current {
+    color: var(--accent);
+    font-weight: 700;
+    background: var(--bg-soft);
+  }
+
+  /* Двухколоночная сетка: rail + контент */
+  body.has-rail .container {
+    max-width: 1060px;
+  }
+
+  .phase-grid-wrap {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 760px);
+    gap: 40px;
+    align-items: start;
+    justify-content: center;
+  }
+
+  /* Боковой rail по шагам (десктоп) */
+  .step-rail {
+    position: sticky;
+    top: calc(var(--topbar-h) + 28px);
+    align-self: start;
+    max-height: calc(100vh - var(--topbar-h) - 48px);
+    overflow-y: auto;
+  }
+
+  .step-rail ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--muted);
+    border-radius: 12px;
+    background: var(--bg-soft);
+    overflow: hidden;
+  }
+
+  .step-rail li + li {
+    border-top: 1px solid var(--border);
+  }
+
+  .step-rail a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    text-decoration: none;
+    color: var(--heading);
+    transition: background-color 0.12s ease, color 0.12s ease;
+  }
+
+  .step-rail a:hover {
+    background: var(--bg);
+  }
+
+  .step-badge {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 26px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--bg);
+    border: 1px solid var(--muted);
+    color: var(--text);
+    font-size: 0.82em;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .step-title {
+    font-size: 0.92em;
+    line-height: 1.3;
+  }
+
+  .step-rail a.current {
+    color: var(--accent);
+    font-weight: 700;
+    background: var(--bg);
+  }
+
+  .step-rail a.current .step-badge {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .step-rail a.past {
+    color: var(--text);
+    opacity: 0.6;
+  }
+
+  .step-rail a.past .step-badge {
+    color: var(--text);
+    border-color: var(--border);
+  }
+
+  /* Ниже 900px: rail прячем, показываем dropdown */
+  @media (max-width: 899px) {
+    .phase-grid-wrap {
+      display: block;
+    }
+
+    .step-rail {
+      display: none;
+    }
+
+    .step-select {
+      display: block;
+    }
   }
 </style>
