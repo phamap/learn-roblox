@@ -98,7 +98,7 @@ game
 | Свойство | Значение | Что делает |
 |----------|----------|------------|
 | **Size** | `4, 1, 4` | Размер (ширина, высота, глубина) |
-| **Position** | `0, 5, 0` | Где стоит (x, y, z). Y=5 значит 5 стёп над платформой |
+| **Position** | `0, 5, 0` | Где стоит (x, y, z). Y=5 значит 5 единиц над платформой |
 | **Anchored** | ✅ включено | Часть стоит на месте, не падает |
 | **Color** | любая яркая | Цвет части |
 | **Material** | `Neon` | Материал (Neon светится) |
@@ -115,7 +115,7 @@ game
 
 ---
 
-## Шаг 3: Experiment с Command Bar
+## Шаг 3: Эксперимент с Command Bar
 
 **Command Bar** — это консоль, где можно выполнять Lua-код прямо в реальном времени. Идеально для экспериментов.
 
@@ -147,7 +147,7 @@ workspace.Part.Transparency = 1
 workspace.Part.Transparency = 0
 ```
 
-**Поднять на 20 стёп вверх:**
+**Поднять на 20 единиц вверх:**
 ```lua
 workspace.Part.Position = Vector3.new(0, 25, 0)
 ```
@@ -385,7 +385,7 @@ end
 | Explorer и Properties | https://create.roblox.com/docs/studio/explorer |
 | Основы Lua в Roblox | https://create.roblox.com/docs/scripting/lua |
 | Событие Touched | https://create.roblox.com/docs/reference/engine/classes/BasePart#Touched |
-| DevForum: Beginnner tutorials | https://devforum.roblox.com/c/education/22 |
+| DevForum: Beginner tutorials | https://devforum.roblox.com/c/education/22 |
 
 > Не нужно читать всё сразу. Эти ссылки на потом, если захочешь разобраться глубже.
 

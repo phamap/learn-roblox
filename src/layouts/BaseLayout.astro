@@ -218,6 +218,10 @@ const stepId = (n: string) => `step-${n.replace(/\./g, '-')}`;
     --green: #859900; /* green */
     --cyan: #2aa198; /* cyan */
     --topbar-h: 96px; /* высота sticky-блока (header + reading-bar) */
+    --content-width: 760px;
+    --rail-width: 220px;
+    --rail-gap: 40px;
+    --page-width: calc(var(--content-width) + var(--rail-width) + var(--rail-gap));
   }
 
   * {
@@ -261,7 +265,7 @@ const stepId = (n: string) => `step-${n.replace(/\./g, '-')}`;
   }
 
   .container {
-    max-width: 860px;
+    max-width: var(--page-width);
     margin: 0 auto;
     padding: 0 20px;
   }
@@ -597,13 +601,9 @@ const stepId = (n: string) => `step-${n.replace(/\./g, '-')}`;
   }
 
   /* Двухколоночная сетка: rail + контент */
-  body.has-rail .container {
-    max-width: 1060px;
-  }
-
   .phase-grid-wrap {
     display: grid;
-    grid-template-columns: 220px minmax(0, 760px);
+    grid-template-columns: var(--rail-width) minmax(0, var(--content-width));
     gap: 40px;
     align-items: start;
     justify-content: center;

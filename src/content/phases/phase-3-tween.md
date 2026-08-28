@@ -40,7 +40,7 @@ local TweenService = game:GetService("TweenService")
 -- Начальная позиция
 local startPos = platform.Position
 
--- Конечная позиция (подняться на 15 стёп вверх)
+-- Конечная позиция (подняться на 15 единиц вверх)
 local endPos = startPos + Vector3.new(0, 15, 0)
 
 -- Настройка анимации

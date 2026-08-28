@@ -73,9 +73,6 @@ const totalAllSteps = phaseMeta.reduce((sum, m) => sum + m.totalSteps, 0);
       }
     </ul>
 
-    <p class="plan-link">
-      <a href="plan/">Читать полный план →</a>
-    </p>
   </section>
 </BaseLayout>
 
@@ -130,7 +127,7 @@ const totalAllSteps = phaseMeta.reduce((sum, m) => sum + m.totalSteps, 0);
   }
 
   .overall-tile {
-    max-width: 480px;
+    max-width: 680px;
     padding: 20px 22px;
     background: var(--bg-soft);
     border-radius: 16px;
@@ -232,21 +229,6 @@ const totalAllSteps = phaseMeta.reduce((sum, m) => sum + m.totalSteps, 0);
   }
 
   .cheats-list a:hover {
-    text-decoration: underline;
-  }
-
-  .plan-link {
-    margin-top: 32px;
-    padding-top: 20px;
-    border-top: 1px solid var(--border);
-  }
-
-  .plan-link a {
-    font-weight: 600;
-    text-decoration: none;
-  }
-
-  .plan-link a:hover {
     text-decoration: underline;
   }
 </style>

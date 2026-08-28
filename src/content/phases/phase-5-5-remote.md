@@ -159,7 +159,7 @@ deathCountEvent.OnServerEvent:Connect(function(player, type, amount, element)
 end)
 ```
 
-> **Задание со звёздочкой*:** сделай простой чат — добавь в GUI **TextBox**, а по нажатию клавиши Enter отправляй его текст: `deathCountEvent:FireServer(textBox.Text)`. Сервер получает сообщение и выводит его через `print`. Вывод всем игрокам на экран изучим позже.
+> **Задание со звёздочкой:** сделай простой чат — добавь в GUI **TextBox**, а по нажатию клавиши Enter отправляй его текст: `deathCountEvent:FireServer(textBox.Text)`. Сервер получает сообщение и выводит его через `print`. Вывод всем игрокам на экран изучим позже.
 
 ---
 
@@ -268,7 +268,7 @@ end)
 
 Умри → нажми «Возродиться» → игрок появляется на последнем чекпоинте. Кнопка из Фазы 5 наконец работает по-настоящему.
 
-> **Задание со звёздочкой*:** добавь кулдаун — не давай игроку спамить FireServer чаще раза в секунду (на сервере сравнивай `os.clock()` с временем прошлого запроса).
+> **Задание со звёздочкой:** добавь кулдаун — не давай игроку спамить FireServer чаще раза в секунду (на сервере сравнивай `os.clock()` с временем прошлого запроса).
 
 ---
 
@@ -276,7 +276,7 @@ end)
 
 | Ошибка | Причина | Решение |
 |--------|---------|---------|
-| "RemoteEvent is not a valid member" | RemoteEvent не найден | Проверь имя иlocation (ReplicatedStorage) |
+| "RemoteEvent is not a valid member" | RemoteEvent не найден | Проверь имя и расположение (ReplicatedStorage) |
 | Сервер не получает данные | OnServerEvent не подключен | Проверь что Script в ServerScriptService |
 | Клиент не может отправить | FireServer не вызывается | Проверь что LocalScript в StarterGui или StarterPlayerScripts |
 | "attempt to index nil" | Объект не найден | Используй `WaitForChild()` вместо `FindFirstChild()` |
